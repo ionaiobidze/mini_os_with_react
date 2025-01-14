@@ -1,0 +1,13 @@
+{
+  "files": {
+    "main.css": "/severity-ai-website/static/css/main.5470a65d.css",
+    "main.js": "/severity-ai-website/static/js/main.ac369ef3.js",
+    "index.html": "/severity-ai-website/index.html",
+    "main.5470a65d.css.map": "/severity-ai-website/static/css/main.5470a65d.css.map",
+    "main.ac369ef3.js.map": "/severity-ai-website/static/js/main.ac369ef3.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.5470a65d.css",
+    "static/js/main.ac369ef3.js"
+  ]
+}
