@@ -1,4 +1,4 @@
-import React, { useContext, useRef, useEffect, useState } from 'react'; // Import useState here
+import React, { useContext, useRef, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import Draggable from 'react-draggable';
 import { Resizable } from 'react-resizable';
@@ -55,7 +55,7 @@ const Content = styled.div`
 function Window({ children, window }) {
   const { state, dispatch } = useContext(AppContext);
   const windowRef = useRef(null);
-  const [size, setSize] = useState({ width: window.width || 300, height: window.height || 200 });
+  const [size, setSize] = useState({ width: window.width, height: window.height });
 
   const handleMinimize = () => {
     dispatch({ type: 'MINIMIZE_WINDOW', payload: window.id });
@@ -98,7 +98,7 @@ function Window({ children, window }) {
   }, [window.maximized, dispatch, window.id]);
 
   useEffect(() => {
-    setSize({ width: window.width || 300, height: window.height || 200 });
+    setSize({ width: window.width, height: window.height });
   }, [window.width, window.height]);
 
   const renderAppContent = () => {

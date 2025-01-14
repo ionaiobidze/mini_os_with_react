@@ -1,5 +1,19 @@
 import React, { createContext, useState, useReducer } from 'react';
 
+// Helper function to get default size based on appId (moved outside)
+const getDefaultSize = (appId) => {
+  switch (appId) {
+    case 'text-editor':
+      return { width: 500, height: 400 }; // Increased size
+    case 'calendar':
+      return { width: 600, height: 500 }; // Increased size
+    case 'tic-tac-toe':
+      return { width: 400, height: 450 }; // Increased size
+    default:
+      return { width: 300, height: 200 };
+  }
+};
+
 // Initial state for the application
 const initialState = {
   openWindows: [], // Array to track open windows { id, appId, title, minimized, maximized, x, y, width, height }
@@ -13,6 +27,7 @@ const appReducer = (state, action) => {
     case 'OPEN_WINDOW':
       // Add a new window to the openWindows array if it's not already open
       if (!state.openWindows.some((window) => window.appId === action.payload.appId)) {
+        const defaultSize = getDefaultSize(action.payload.appId);
         return {
           ...state,
           openWindows: [
@@ -24,8 +39,7 @@ const appReducer = (state, action) => {
               maximized: false,
               x: 50,
               y: 50,
-              width: 300, // Add initial width
-              height: 200, // Add initial height
+              ...defaultSize,
             },
           ],
         };
@@ -81,16 +95,16 @@ const appReducer = (state, action) => {
           window.id === action.payload.id ? { ...window, x: action.payload.x, y: action.payload.y } : window
         ),
       };
-      case 'UPDATE_WINDOW_SIZE':
-        // Update window size after resizing
-        return {
-          ...state,
-          openWindows: state.openWindows.map((window) =>
-            window.id === action.payload.id
-              ? { ...window, width: action.payload.width, height: action.payload.height }
-              : window
-          ),
-        };
+    case 'UPDATE_WINDOW_SIZE':
+      // Update window size after resizing
+      return {
+        ...state,
+        openWindows: state.openWindows.map((window) =>
+          window.id === action.payload.id
+            ? { ...window, width: action.payload.width, height: action.payload.height }
+            : window
+        ),
+      };
     default:
       return state;
   }

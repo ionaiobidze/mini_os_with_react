@@ -1,6 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import './CalendarApp.css';
-import { format, addMonths, subMonths, startOfMonth, endOfMonth, startOfWeek, endOfWeek, isSameMonth, isSameDay, addDays } from 'date-fns';
+import {
+  format,
+  addMonths,
+  subMonths,
+  startOfMonth,
+  endOfMonth,
+  startOfWeek,
+  endOfWeek,
+  isSameMonth,
+  isSameDay,
+  addDays,
+} from 'date-fns';
 
 function CalendarApp() {
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -19,7 +30,7 @@ function CalendarApp() {
   }, [events]);
 
   const header = () => {
-    const dateFormat = "MMMM yyyy";
+    const dateFormat = 'MMMM yyyy';
     return (
       <div className="header row flex-middle">
         <div className="col col-start">
@@ -38,7 +49,7 @@ function CalendarApp() {
   };
 
   const daysOfWeek = () => {
-    const dateFormat = "iiii";
+    const dateFormat = 'iiii';
     const days = [];
     let startDate = startOfWeek(currentDate);
     for (let i = 0; i < 7; i++) {
@@ -57,11 +68,11 @@ function CalendarApp() {
     const startDate = startOfWeek(monthStart);
     const endDate = endOfWeek(monthEnd);
 
-    const dateFormat = "d";
+    const dateFormat = 'd';
     const rows = [];
     let days = [];
     let day = startDate;
-    let formattedDate = "";
+    let formattedDate = '';
 
     while (day <= endDate) {
       for (let i = 0; i < 7; i++) {
@@ -71,8 +82,10 @@ function CalendarApp() {
           <div
             className={`col cell ${
               !isSameMonth(day, monthStart)
-                ? "disabled"
-                : isSameDay(day, selectedDate) ? "selected" : ""
+                ? 'disabled'
+                : isSameDay(day, selectedDate)
+                ? 'selected'
+                : ''
             }`}
             key={day}
             onClick={() => onDateClick(cloneDay)}
@@ -80,9 +93,10 @@ function CalendarApp() {
             <span className="number">{formattedDate}</span>
             <span className="bg">{formattedDate}</span>
             <div className="event">
-              {events[format(day, 'yyyy-MM-dd')] && events[format(day, 'yyyy-MM-dd')].map((event, index) => (
-                <div key={index}>{event}</div>
-              ))}
+              {events[format(day, 'yyyy-MM-dd')] &&
+                events[format(day, 'yyyy-MM-dd')].map((event, index) => (
+                  <div key={index}>{event}</div>
+                ))}
             </div>
           </div>
         );
@@ -98,14 +112,14 @@ function CalendarApp() {
     return <div className="body">{rows}</div>;
   };
 
-  const onDateClick = day => {
+  const onDateClick = (day) => {
     setSelectedDate(day);
-    const event = prompt("Enter event for " + format(day, 'yyyy-MM-dd'));
+    const event = prompt('Enter event for ' + format(day, 'yyyy-MM-dd'));
     if (event) {
       const dateKey = format(day, 'yyyy-MM-dd');
       setEvents({
         ...events,
-        [dateKey]: [...(events[dateKey] || []), event]
+        [dateKey]: [...(events[dateKey] || []), event],
       });
     }
   };
