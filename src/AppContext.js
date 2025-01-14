@@ -2,7 +2,7 @@ import React, { createContext, useState, useReducer } from 'react';
 
 // Initial state for the application
 const initialState = {
-  openWindows: [], // Array to track open windows { id, appId, title, minimized, maximized, x, y }
+  openWindows: [], // Array to track open windows { id, appId, title, minimized, maximized, x, y, width, height }
   activeApp: null, // Currently active app
   theme: 'light', // Current theme
 };
@@ -15,7 +15,19 @@ const appReducer = (state, action) => {
       if (!state.openWindows.some((window) => window.appId === action.payload.appId)) {
         return {
           ...state,
-          openWindows: [...state.openWindows, { ...action.payload, id: Date.now(), minimized: false, maximized: false, x: 50, y: 50 }],
+          openWindows: [
+            ...state.openWindows,
+            {
+              ...action.payload,
+              id: Date.now(),
+              minimized: false,
+              maximized: false,
+              x: 50,
+              y: 50,
+              width: 300, // Add initial width
+              height: 200, // Add initial height
+            },
+          ],
         };
       }
       return state;
@@ -69,6 +81,16 @@ const appReducer = (state, action) => {
           window.id === action.payload.id ? { ...window, x: action.payload.x, y: action.payload.y } : window
         ),
       };
+      case 'UPDATE_WINDOW_SIZE':
+        // Update window size after resizing
+        return {
+          ...state,
+          openWindows: state.openWindows.map((window) =>
+            window.id === action.payload.id
+              ? { ...window, width: action.payload.width, height: action.payload.height }
+              : window
+          ),
+        };
     default:
       return state;
   }

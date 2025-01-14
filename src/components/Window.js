@@ -1,4 +1,4 @@
-import React, { useContext, useRef, useEffect } from 'react';
+import React, { useContext, useRef, useEffect, useState } from 'react'; // Import useState here
 import styled from 'styled-components';
 import Draggable from 'react-draggable';
 import { Resizable } from 'react-resizable';
@@ -14,10 +14,11 @@ const WindowContainer = styled.div`
   border: 1px solid #cccccc;
   box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2);
   z-index: ${({ active }) => (active ? 100 : 99)};
-  width: ${({ maximized }) => (maximized ? '100%' : 'auto')};
-  height: ${({ maximized }) => (maximized ? '100%' : 'auto')};
+  width: ${({ maximized, width }) => (maximized ? '100%' : width ? `${width}px` : 'auto')};
+  height: ${({ maximized, height }) => (maximized ? '100%' : height ? `${height}px` : 'auto')};
   top: ${({ maximized }) => (maximized ? '0' : 'auto')};
   left: ${({ maximized }) => (maximized ? '0' : 'auto')};
+  display: ${({ minimized }) => (minimized ? 'none' : 'block')};
 `;
 
 const TitleBar = styled.div`
@@ -48,12 +49,13 @@ const WindowButtons = styled.div`
 const Content = styled.div`
   padding: 10px;
   overflow: auto;
-  height: ${({ maximized }) => (maximized ? 'calc(100% - 30px)' : 'auto')}; // Adjust height for maximized state
+  height: ${({ maximized, height }) => (maximized ? `calc(100% - 30px)` : height ? `calc(${height}px - 30px)` : 'auto')};
 `;
 
 function Window({ children, window }) {
   const { state, dispatch } = useContext(AppContext);
   const windowRef = useRef(null);
+  const [size, setSize] = useState({ width: window.width || 300, height: window.height || 200 });
 
   const handleMinimize = () => {
     dispatch({ type: 'MINIMIZE_WINDOW', payload: window.id });
@@ -68,11 +70,18 @@ function Window({ children, window }) {
   };
 
   const handleDrag = (e, ui) => {
-    dispatch({ type: 'UPDATE_WINDOW_POSITION', payload: { id: window.id, x: ui.x, y: ui.y } });
+    dispatch({
+      type: 'UPDATE_WINDOW_POSITION',
+      payload: { id: window.id, x: ui.x, y: ui.y },
+    });
   };
 
-  const handleResize = (event, { size }) => {
-    // Update the window size in the state. Need to add width and height to the state management
+  const handleResize = (event, { element, size: newSize }) => {
+    setSize(newSize);
+    dispatch({
+      type: 'UPDATE_WINDOW_SIZE',
+      payload: { id: window.id, width: newSize.width, height: newSize.height },
+    });
   };
 
   const handleWindowClick = () => {
@@ -81,10 +90,16 @@ function Window({ children, window }) {
 
   useEffect(() => {
     if (window.maximized) {
-      // When the window is maximized, we don't need to update its position, so we set it to 0,0
-      dispatch({ type: 'UPDATE_WINDOW_POSITION', payload: { id: window.id, x: 0, y: 0 } });
+      dispatch({
+        type: 'UPDATE_WINDOW_POSITION',
+        payload: { id: window.id, x: 0, y: 0 },
+      });
     }
   }, [window.maximized, dispatch, window.id]);
+
+  useEffect(() => {
+    setSize({ width: window.width || 300, height: window.height || 200 });
+  }, [window.width, window.height]);
 
   const renderAppContent = () => {
     switch (window.appId) {
@@ -108,17 +123,20 @@ function Window({ children, window }) {
       disabled={window.maximized}
     >
       <Resizable
-        width={300}
-        height={200}
+        width={size.width}
+        height={size.height}
         onResize={handleResize}
         lockAspectRatio={false}
-        disabled={window.maximized}
+        disabled={window.maximized || window.minimized}
       >
         <WindowContainer
           ref={windowRef}
           onClick={handleWindowClick}
           active={state.activeApp === window.appId}
           maximized={window.maximized}
+          minimized={window.minimized}
+          width={size.width}
+          height={size.height}
         >
           <TitleBar className="handle">
             <Title>{window.title}</Title>
@@ -128,7 +146,7 @@ function Window({ children, window }) {
               <button onClick={handleClose}>X</button>
             </WindowButtons>
           </TitleBar>
-          <Content maximized={window.maximized}>
+          <Content maximized={window.maximized} height={size.height}>
             {renderAppContent()}
           </Content>
         </WindowContainer>
