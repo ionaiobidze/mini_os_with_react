@@ -105,6 +105,13 @@ const appReducer = (state, action) => {
             : window
         ),
       };
+    case 'UPDATE_WINDOW_TITLE':
+      return {
+        ...state,
+        openWindows: state.openWindows.map((window) =>
+          window.id === action.payload.id ? { ...window, title: action.payload.newTitle } : window
+        ),
+      };
     default:
       return state;
   }

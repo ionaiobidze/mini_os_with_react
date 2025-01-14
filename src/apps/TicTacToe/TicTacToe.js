@@ -7,9 +7,9 @@ function TicTacToe() {
   const [xIsNext, setXIsNext] = useState(true);
   const [winner, setWinner] = useState(null);
   const [scores, setScores] = useState({ X: 0, O: 0, Draw: 0 });
+  const [isComputerTurn, setIsComputerTurn] = useState(false);
 
   useEffect(() => {
-    // Load scores from localStorage when the component mounts
     const savedScores = localStorage.getItem('ticTacToeScores');
     if (savedScores) {
       setScores(JSON.parse(savedScores));
@@ -17,9 +17,15 @@ function TicTacToe() {
   }, []);
 
   useEffect(() => {
-    // Save scores to localStorage whenever they change
     localStorage.setItem('ticTacToeScores', JSON.stringify(scores));
   }, [scores]);
+
+  useEffect(() => {
+    if (isComputerTurn && !winner) {
+      const bestMove = findBestMove(board);
+      handleClick(bestMove);
+    }
+  }, [isComputerTurn, board, winner]);
 
   const handleClick = (i) => {
     if (winner || board[i]) return;
@@ -27,7 +33,6 @@ function TicTacToe() {
     const newBoard = board.slice();
     newBoard[i] = xIsNext ? 'X' : 'O';
     setBoard(newBoard);
-    setXIsNext(!xIsNext);
 
     const newWinner = calculateWinner(newBoard);
     if (newWinner) {
@@ -42,6 +47,9 @@ function TicTacToe() {
         ...scores,
         Draw: scores.Draw + 1,
       });
+    } else {
+      setXIsNext(!xIsNext);
+      setIsComputerTurn(!isComputerTurn);
     }
   };
 
@@ -49,6 +57,7 @@ function TicTacToe() {
     setBoard(initialBoard);
     setXIsNext(true);
     setWinner(null);
+    setIsComputerTurn(false);
   };
 
   const calculateWinner = (squares) => {
@@ -69,6 +78,68 @@ function TicTacToe() {
       }
     }
     return null;
+  };
+
+  const findBestMove = (currentBoard) => {
+    let bestVal = -Infinity;
+    let bestMove = -1;
+
+    for (let i = 0; i < currentBoard.length; i++) {
+      if (currentBoard[i] === null) {
+        currentBoard[i] = 'O'; // Assume computer is 'O'
+        let moveVal = minimax(currentBoard, 0, false, -Infinity, Infinity);
+        currentBoard[i] = null;
+
+        if (moveVal > bestVal) {
+          bestMove = i;
+          bestVal = moveVal;
+        }
+      }
+    }
+    return bestMove;
+  };
+
+  const minimax = (currentBoard, depth, isMaximizingPlayer, alpha, beta) => {
+    const currentWinner = calculateWinner(currentBoard);
+    if (currentWinner === 'O') {
+      return 10 - depth;
+    } else if (currentWinner === 'X') {
+      return depth - 10;
+    } else if (currentBoard.every((square) => square !== null)) {
+      return 0;
+    }
+
+    if (isMaximizingPlayer) {
+      let maxEval = -Infinity;
+      for (let i = 0; i < currentBoard.length; i++) {
+        if (currentBoard[i] === null) {
+          currentBoard[i] = 'O';
+          let evaluation = minimax(currentBoard, depth + 1, false, alpha, beta);
+          currentBoard[i] = null;
+          maxEval = Math.max(maxEval, evaluation);
+          alpha = Math.max(alpha, evaluation);
+          if (beta <= alpha) {
+            break;
+          }
+        }
+      }
+      return maxEval;
+    } else {
+      let minEval = Infinity;
+      for (let i = 0; i < currentBoard.length; i++) {
+        if (currentBoard[i] === null) {
+          currentBoard[i] = 'X';
+          let evaluation = minimax(currentBoard, depth + 1, true, alpha, beta);
+          currentBoard[i] = null;
+          minEval = Math.min(minEval, evaluation);
+          beta = Math.min(beta, evaluation);
+          if (beta <= alpha) {
+            break;
+          }
+        }
+      }
+      return minEval;
+    }
   };
 
   const renderSquare = (i) => {
@@ -99,18 +170,10 @@ function TicTacToe() {
         </div>
       </div>
       <div className="game-info">
-        <div>
-          Next player: {xIsNext ? 'X' : 'O'}
-        </div>
-        <div>
-          Winner: {winner}
-        </div>
-        <div>
-          Scores: X - {scores.X}, O - {scores.O}, Draw - {scores.Draw}
-        </div>
-        <button onClick={resetGame}>
-          Reset Game
-        </button>
+        <div>Next player: {xIsNext ? 'X' : 'O'}</div>
+        <div>Winner: {winner}</div>
+        <div>Scores: X - {scores.X}, O - {scores.O}, Draw - {scores.Draw}</div>
+        <button onClick={resetGame}>Reset Game</button>
       </div>
     </div>
   );

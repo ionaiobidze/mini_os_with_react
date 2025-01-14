@@ -16,18 +16,6 @@ import {
 function CalendarApp() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(new Date());
-  const [events, setEvents] = useState({});
-
-  useEffect(() => {
-    const storedEvents = localStorage.getItem('calendarEvents');
-    if (storedEvents) {
-      setEvents(JSON.parse(storedEvents));
-    }
-  }, []);
-
-  useEffect(() => {
-    localStorage.setItem('calendarEvents', JSON.stringify(events));
-  }, [events]);
 
   const header = () => {
     const dateFormat = 'MMMM yyyy';
@@ -35,14 +23,14 @@ function CalendarApp() {
       <div className="header row flex-middle">
         <div className="col col-start">
           <div className="icon" onClick={prevMonth}>
-            chevron_left
+            Previous Month
           </div>
         </div>
         <div className="col col-center">
           <span>{format(currentDate, dateFormat)}</span>
         </div>
         <div className="col col-end" onClick={nextMonth}>
-          <div className="icon">chevron_right</div>
+          <div className="icon">Next Month</div>
         </div>
       </div>
     );
@@ -92,12 +80,6 @@ function CalendarApp() {
           >
             <span className="number">{formattedDate}</span>
             <span className="bg">{formattedDate}</span>
-            <div className="event">
-              {events[format(day, 'yyyy-MM-dd')] &&
-                events[format(day, 'yyyy-MM-dd')].map((event, index) => (
-                  <div key={index}>{event}</div>
-                ))}
-            </div>
           </div>
         );
         day = addDays(day, 1);
@@ -114,14 +96,6 @@ function CalendarApp() {
 
   const onDateClick = (day) => {
     setSelectedDate(day);
-    const event = prompt('Enter event for ' + format(day, 'yyyy-MM-dd'));
-    if (event) {
-      const dateKey = format(day, 'yyyy-MM-dd');
-      setEvents({
-        ...events,
-        [dateKey]: [...(events[dateKey] || []), event],
-      });
-    }
   };
 
   const nextMonth = () => {
